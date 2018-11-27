@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Веб додаток для он-лайн розпізнавання тексту з зображень</title>
+    <script src="/_js/jquery-3.2.1.js"></script>
+    <link rel="stylesheet" href="/_css/bootstrap.css" type="text/css" />
+
+    <link rel="stylesheet" href="/_css/SiteStyles.css" type="text/css" />
+    <script src="/_js/SiteScripts.js"></script>
+    <script src="/_js/w2itr.js"></script>
+
+    <script src="/tesseract.js"></script>
+    <script src="/brain-gh-pages/brain-0.6.3.min.js"></script>
+    <script src="/synaptic-master/dist/synaptic.min.js"></script>
+ 
+ <!--   <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script> -->
+</head>
+<body>
+
+    <div class="header">
+        <div style=" text-align:right;  font-family: sans-serif, 'Segoe UI', Tahoma, Geneva, Verdana; font-size:24px; font-style:italic; ">Розпізнавання тексту на зображеннях онлайн</div>
+
+        <div style="width:auto;">
+
+            <a href="/index.html" class="btn btn-default btn-lg">Головна</a>
+            <a href="/index.html?page=onlinepage" class="btn btn-default btn-lg">Онлайн</a>
+            <a href="/index.html?page=uselibrarypage" class="btn btn-default btn-lg">Використання бібліотек</a>
+            <a href="/index.html?page=neuralnetworkpage" class="btn btn-default btn-lg">Нейромережі</a>
+            <a href="/index.html?page=materialspage" class="btn btn-default btn-lg">Матеріали</a>
+       <!--     <a href="/index.html?page=aboutpage" class="btn btn-default btn-lg">Про нас</a>  -->
+            <a href="/index.html?page=feedback" class="btn btn-default btn-lg">Зворотній зв’язок</a>
+
+
+            <div style=" text-align:right; margin-top:10px; ">
+                <a href="/index.html?page=autorizationpage" class="btn btn-default ">Реєстрація</a>
+                <a href="/index.html?page=autorizationpage" class="btn btn-default ">Вхід</a>
+            </div>
+        </div>
+    </div>
+
+ 
+<!--
+    <p>При \(a \ne 0\) получается два корня уравнения \(ax^2 + bx + c = 0\),
+  для нахождения которых используют формулу
+  $${x}_{1,2} = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$</p>   --->
+
+    <div id="bodycontent" class="mainbody" style="">
+
+   <!--     <object type="text/html" data="OnlinePage.html"></object> -->
+
+    </div>
+
+    <div class="futter" id="content">
+        Система розпізнавання текстів<br />
+        Розробник VerhovnyMenko<br />
+        _______________________<br />
+    </div>
+
+
+
+    
+    <script type="text/javascript">
+ 
+        //Одержати з адресної строки параметр page
+        var page = getUrlVars()["page"];
+
+        if (typeof (page) != "undefined")
+        {
+            page += ".html";
+            $("#bodycontent").load(page);
+        }
+        else {
+            $("#bodycontent").load("mainpage.html");
+        }
+
+    </script>
+
+
+    <!-- <button onclick="showPopup('/_popups/popup.html')" >Open Modal</button> -->
+
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+
+            <div class="close" onclick="closePopup()">&times;</div>
+    
+            <div id="popupContent">Some text in the Modal..</div>
+
+      </div>
+    </div>
+
+
+</body>
+</html>

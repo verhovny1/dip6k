@@ -1,0 +1,463 @@
+﻿
+<script>
+
+    function progressUpdate(packet) {
+        var log = document.getElementById('log');
+
+        if (log.firstChild && log.firstChild.status === packet.status) {
+            if ('progress' in packet) {
+                var progress = log.firstChild.querySelector('progress')
+                progress.value = packet.progress
+            }
+        } else {
+            var line = document.createElement('div');
+            line.status = packet.status;
+            var status = document.createElement('div')
+            status.className = 'status'
+            status.appendChild(document.createTextNode(packet.status))
+            line.appendChild(status)
+
+            if ('progress' in packet) {
+                var progress = document.createElement('progress')
+                progress.value = packet.progress
+                progress.max = 1
+                line.appendChild(progress)
+            }
+
+
+            if (packet.status == 'done') {
+                var pre = document.createElement('pre')
+                pre.appendChild(document.createTextNode(packet.data.text))
+                line.innerHTML = ''
+                line.appendChild(pre)
+
+            }
+
+            log.insertBefore(line, log.firstChild)
+        }
+    }
+
+    function recognizeFile(file) {
+        document.querySelector("#log").innerHTML = ''
+
+        Tesseract.recognize(file, {
+            lang: document.querySelector('#langsel').value
+        })
+            .progress(function (packet) {
+                //console.info(packet)
+                //progressUpdate(packet)
+
+            })
+            .then(function (data) {
+                //console.log(data)
+                progressUpdate({ status: 'done', data: data })
+            })
+    }
+</script>
+
+
+
+<div>
+
+    <h2>Інструментарій для розпізнавання текст онлайну</h2><br>
+    
+    Завантажте файл:
+    <div style="overflow:hidden;">
+        <table style="  margin: 3px;  width:100%;">
+            <tr>
+                <td style=" padding: 5px;">
+
+                    <div style="border:groove 1px gray; height:500px; width:400px; border-radius:5px; padding:3px; overflow:scroll;">
+
+                        Виберіть зображення:
+                        <input id="imageUpload" type="file" onchange="window.lastFile = this.files[0]"  />
+                        <br>
+
+                        Завантажте зображення з веб камери<br>
+                        <button id="webCamOpen" class="btn btn-default">Увімкнути камеру</button>
+                        <button id="webCamClose" class="btn btn-default" style="display: none;">Вимкнути камеру</button>
+                        <br>
+
+                        <div hidden  id="cameraDiv" style="border:groove 1px gray;  margin: 3px; border-radius: 5px; padding: 5px;">
+                            Камера:<br />
+                            <video id="video" width="320" height="240" style="border:double 2px gray;" autoplay></video><br>
+                            <button onclick="takeSnapshot();" class="btn btn-default">Зробити знімок</button>
+
+                            <button id="start" disabled style="display: none;">Старт</button>
+                            <button id="stop" disabled style="display: none;">Стоп</button>
+                            <button onclick="" style="display: none;">Закрити</button>
+                        </div>
+                        <br>
+
+                        <!--Оберіть pdf документ
+                        <input type="file" />-->
+                    </div>
+
+                </td>
+                <td style=" padding: 5px; width:100%; height:500px;  overflow:scroll;">
+
+                    <div id="imageDiv" style="border:groove 1px gray;  margin: 3px; border-radius: 5px; padding: 5px;   ">
+                        Знімок:<br />
+                        <canvas id="canvas" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br>
+
+
+
+    <div>Нейронні мережі для розпізнавання тексту:</div>
+    <select id="neuralNetworksSelect" class="form-control">
+        <option value="0">За замовчуванням</option>
+        <option value="1">Метод 1</option>
+        <option value="2">Метод 2</option>
+    </select><br>
+ 
+    <div class="checkbox">
+    <label>
+        <input id="isTextAnalizi" type="checkbox"   checked="true" >аналізувати вихідний текст
+    </label>
+    <br><br>
+    
+    <div>Результат розпізнавання: <button class="btn btn-default btn-xs"   id="downloadLink" >скачати</button></div>
+    <div id="recognitionResultDiv" style="width:100; min-height:100px; border: 1px solid rgb(230,230,230); border-radius: 5px; " >
+
+    </div>
+
+ 
+</div>
+<br>
+
+<div style="text-align:right;">
+    <button id="startWork"  class="btn btn-success " >Запуститу розпізнавання</button>
+    <br><br><button class="btn btn-success " id="startTrain" >Тренувати нейронну мережу</button>
+</div>
+
+
+
+<div id="TrackingjsData" style="display: none;"  >
+    <canvas id="canvas1" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="canvas2" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="canvas3" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="canvas4" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="canvas5" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="canvas6" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+</div>
+
+<!-- style="display: none;" -->
+<div    >
+    <div>Мова тексту:</div>
+    <select id="langsel" class="form-control">
+        <option value="auto">Автовизначення</option>
+        <option value='afr'> Afrikaans             </option>
+        <option value='ara'> Arabic                </option>
+        <option value='aze'> Azerbaijani           </option>
+        <option value='bel'> Belarusian            </option>
+        <option value='ben'> Bengali               </option>
+        <option value='bul'> Bulgarian             </option>
+        <option value='cat'> Catalan               </option>
+        <option value='ces'> Czech                 </option>
+        <option value='chi_sim'> Chinese               </option>
+        <option value='chi_tra'> Traditional Chinese   </option>
+        <option value='chr'> Cherokee              </option>
+        <option value='dan'> Danish                </option>
+        <option value='deu'> German                </option>
+        <option value='ell'> Greek                 </option>
+        <option value='eng' selected> English                </option>
+        <option value='enm'> English (Old)         </option>
+        <option value='meme'> Internet Meme                </option>
+        <option value='epo'> Esperanto             </option>
+        <option value='epo_alt'> Esperanto alternative </option>
+        <option value='equ'> Math                  </option>
+        <option value='est'> Estonian              </option>
+        <option value='eus'> Basque                </option>
+        <option value='fin'> Finnish               </option>
+        <option value='fra'> French                </option>
+        <option value='frk'> Frankish              </option>
+        <option value='frm'> French (Old)          </option>
+        <option value='glg'> Galician              </option>
+        <option value='grc'> Ancient Greek         </option>
+        <option value='heb'> Hebrew                </option>
+        <option value='hin'> Hindi                 </option>
+        <option value='hrv'> Croatian              </option>
+        <option value='hun'> Hungarian             </option>
+        <option value='ind'> Indonesian            </option>
+        <option value='isl'> Icelandic             </option>
+        <option value='ita'> Italian               </option>
+        <option value='ita_old'> Italian (Old)         </option>
+        <option value='jpn'> Japanese              </option>
+        <option value='kan'> Kannada               </option>
+        <option value='kor'> Korean                </option>
+        <option value='lav'> Latvian               </option>
+        <option value='lit'> Lithuanian            </option>
+        <option value='mal'> Malayalam             </option>
+        <option value='mkd'> Macedonian            </option>
+        <option value='mlt'> Maltese               </option>
+        <option value='msa'> Malay                 </option>
+        <option value='nld'> Dutch                 </option>
+        <option value='nor'> Norwegian             </option>
+        <option value='pol'> Polish                </option>
+        <option value='por'> Portuguese            </option>
+        <option value='ron'> Romanian              </option>
+        <option value='rus'> Russian               </option>
+        <option value='slk'> Slovakian             </option>
+        <option value='slv'> Slovenian             </option>
+        <option value='spa'> Spanish               </option>
+        <option value='spa_old'> Old Spanish           </option>
+        <option value='sqi'> Albanian              </option>
+        <option value='srp'> Serbian (Latin)       </option>
+        <option value='swa'> Swahili               </option>
+        <option value='swe'> Swedish               </option>
+        <option value='tam'> Tamil                 </option>
+        <option value='tel'> Telugu                </option>
+        <option value='tgl'> Tagalog               </option>
+        <option value='tha'> Thai                  </option>
+        <option value='tur'> Turkish               </option>
+        <option value='ukr'> Ukrainian             </option>
+        <option value='vie'> Vietnamese            </option>
+    </select><br>
+
+    <button class="btn btn-success " onclick="recognizeFile(window.lastFile)" >Запуститу розпізнавання тексту з основного канфасу</button>
+       
+    <div id="log"></div>
+</div>
+
+<div style="display: none;" >
+    <canvas id="workCanvas1" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas2" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas3" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas4" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas5" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas6" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas> 
+    <canvas id="workCanvas7" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas8" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas9" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
+    <canvas id="workCanvas10" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>  
+</div>
+
+
+
+<script type="text/javascript">
+
+    var videoDiv = document.getElementById("video"),
+    vendorUrl = window.URL || window.webkitURL;
+    navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.oGetUserMedia || navigator.msGetUserMedia;
+    var MediaStream;
+
+    //Функція ВКЛ/ВИКЛ камеру
+    function captureWebcam(video) {
+        navigator.getMedia({
+            video: video
+        }, function (stream) {
+            videoDiv.src = vendorUrl.createObjectURL(stream);
+            MediaStream = stream.getTracks()[0]; // create the stream tracker
+        }, function (error) {
+            console.log(error)
+        });
+    }
+
+    //Відкрити камеру
+    $("#webCamOpen").on("click", function () {
+        $("#cameraDiv").show();
+        captureWebcam(true, false)
+
+        $("#webCamOpen").hide();
+        $("#webCamClose").show();
+    });
+
+    //Закрити камеру камеру
+    $("#webCamClose").on("click", function () {
+        $("#cameraDiv").hide();
+        MediaStream.stop();
+
+        $("#webCamOpen").show();
+        $("#webCamClose").hide();
+    });
+
+    //Зробити знімок
+    function takeSnapshot()
+    {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        
+            var video = document.getElementById('video');
+
+        canvas.width = video.width;
+        canvas.height = video.height;
+        canvas.style.width = '640px';
+        canvas.style.height = '480px';
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+         
+        //var img = document.getElementById('img');
+        //img.src = canvas.toDataURL('image/png');
+    }
+ 
+    //Завантаження зображення з компютера
+    $("#imageUpload").change(function () {
+
+        if (this.files && this.files[0])
+        {
+            var FR = new FileReader();
+            FR.onload = function (e)
+            {
+                var img = new Image();
+                img.addEventListener("load", function ()
+                {
+                    var canvas = document.getElementById("canvas");
+                    var context = canvas.getContext("2d");
+
+                    canvas.width = img.width;  
+                    canvas.height = img.height;  
+                    canvas.style.width = '640px'; 
+                    canvas.style.height = Math.round( img.height / (img.width / 640)) + "px";//  '480px';
+ 
+                    context.drawImage(img,0,0, img.width, img.height);
+                });
+
+                img.src = e.target.result;
+
+            };
+            FR.readAsDataURL(this.files[0]);
+        }
+    })
+
+
+
+    //Запуск розрізнавання тексту
+    $("#startWork").click(function () {
+
+        console.log("");
+        console.log("Початок розпізнавання, "+ getDateTimeNow() + " | " + performance.now());
+        //alert("startWork");
+        startRec('canvas');
+
+    });
+
+    //процес тренування мережі
+    $("#startTrain").click(function () 
+    {
+
+        alert("startTrain");
+        traitNerl('canvas');
+
+    });
+ 
+
+
+    function startOnlinePage()
+    {
+        //одержимо всі мережі користувача
+        $.post("/_php_scripts/get_admin_and_user_networks.php",
+        {
+            admin_id: ADMIN_ID,
+            user_id: USER_ID
+        },
+        function(data, status)
+        { 
+            if (data != "0 results")
+            {
+                var obj = JSON.parse( data );
+
+                var st = "";
+                for (var i = 0; i < obj.length; i++) 
+                {
+                    var UNN = {};
+                    UNN.network_id = obj[i].network_id;
+                    UNN.network_name = obj[i].network_name;
+                    UNN.network_json = obj[i].network_json;
+                    UNN.network_symbols = obj[i].network_symbols;
+                    UNN.user_id = obj[i].user_id;
+                    UNN.network_activation_function = obj[i].network_activation_function;
+                    UNN.network_hidden_layers = obj[i].network_hidden_layers;
+
+                    st += "<option value='"+UNN.network_id+"' >"+UNN.network_name+"</option>";
+                };
+
+
+                $("#neuralNetworksSelect").html( st );
+ 
+            }
+        });
+
+
+        
+
+    }
+    startOnlinePage();
+ 
+
+
+    $('#downloadLink').click(function(){
+  
+
+ 
+        var textToWrite = $("#recognitionResultDiv").text();
+        var textFileAsBlob = new Blob([ textToWrite ], { type: 'text/plain' });
+        var fileNameToSaveAs = "Результат.txt";
+
+        var downloadLink = document.createElement("a");
+        downloadLink.download = fileNameToSaveAs;
+        downloadLink.innerHTML = "Download File";
+        if (window.webkitURL != null) {
+        // Chrome allows the link to be clicked without actually adding it to the DOM.
+        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        } else {
+        // Firefox requires the link to be added to the DOM before it can be clicked.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+        downloadLink.onclick = destroyClickedElement;
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        }
+
+        downloadLink.click(); 
+ 
+    });
+
+</script>
+
+
+
+
+
+
+
+
+
+
+ <style>
+ 
+    #log > div {
+        color: #313131;
+        border-top: 1px solid #dadada;
+        padding: 9px;
+        display: flex;
+    }
+    #log > div:first-child {
+        border: 0;
+    }
+    .status {
+        min-width: 250px;
+    }
+    #log {
+        border: 1px solid #dadada;
+        padding: 10px;
+        margin-top: 20px;
+        min-height: 100px;
+    }
+    body {
+        font-family: sans-serif;
+        margin: 30px;
+    }
+    progress {
+        display: block;
+        width: 100%;
+        transition: opacity 0.5s linear;
+    }
+    progress[value="1"] {
+        opacity: 0.5;
+    }
+</style>

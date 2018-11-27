@@ -1,0 +1,81 @@
+﻿body {
+    width:92%; 
+    margin-left:4%;
+    margin-top: 30px;
+    min-width:1000px;
+    font-family:  'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.header{
+    width:100%;    
+    border:solid 2px #228B22;  /*#7dc9c5;*/  
+    /* max-height:120px; */ 
+    color:white; 
+    background-color: #228B22; /*#7dc9c5;*/ 
+    border-top-left-radius:5px; 
+    border-top-right-radius:5px; 
+    text-align:left;
+    padding:10px;
+}
+
+.mainbody{
+    width:100%; 
+    border:solid 2px #228B22; /* #7dc9c5;  */ 
+    color:black;/*background-color:#cef3ec;*/
+    min-height:400px; 
+    padding:10px;
+}
+
+.futter{
+    width:100%;text-align:right;
+    max-height:100px; 
+    border:solid 2px  #228B22; /*  #7dc9c5;  */
+    background-color: #228B22; /*#7dc9c5;*/
+    color:white; 
+    border-bottom-left-radius:5px;
+    border-bottom-right-radius:5px;
+    padding:10px;
+}
+
+
+
+
+
+
+/* The Modal (background) */
+.modal {     
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+
+    min-width: 1000px;
+}
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    min-width: 900px;
+}
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

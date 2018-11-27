@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <script src="/_js/jquery-3.2.1.js"></script>
+    <link rel="stylesheet" href="/_css/bootstrap.css" type="text/css" />
+
+    <link rel="stylesheet" href="/_css/SiteStyles.css" type="text/css" />
+    <script src="/_js/SiteScripts.js"></script>
+    <script src="/_js/w2itr.js"></script>
+
+    <script src="/tesseract.js"></script>
+    <script src="/brain-gh-pages/brain-0.6.3.min.js"></script>
+    <script src="/synaptic-master/dist/synaptic.min.js"></script>
+
+</head>
+<body> 
+
+	<h2>Використання бібліотеки для розпізнавання тексту на зображенні</h2><br> 
+	<p>UseLibraryPage - Тут як використовувати розроблену мною бібліотеку з прикладами і подробним описом</p>
+	<br><br><br><br>
+	<div id="thisin" ></div>
+	<div id="thebody" style="font-size: 14pt;" ></div>
+
+
+ </body>
+</html>
+
+<script type="text/javascript">
+	var theWords  = ["0","1","2","3","4","5","6","7","8","9",
+	"(",")","-","*","/","+","=",",",".","!","?",":",";","%","$","'","\"",
+	"А","Б","В","Г","Ґ","Д","Е","Є","Ж","З","И","І","Ї","Й","К","Л","М","Н","О","П","Р","С","Т","У","Ф","Х","Ц","Ч","Ш","Щ","Ь","Ю","Я",
+	"а","б","в","г","ґ","д","е","є","ж","з","и","і","ї","й","к","л","м","н","о","п","р","с","т","у","ф","х","ц","ч","ш","щ","ь","ю","я",
+	"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+	"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+	
+	var theWordsCount = 10 + 15 +  33*2 + 26*2 ; //= 143
+ 
+/*
+	//var uaSimv = [ "а","б","в","г","ґ","д","е","є","ж","з","и","і","ї","й","к","л","м","н","о","п","р","с","т","у","ф","х","ц","ч","ш","щ","ь","ю","я","0","1","2","3","4","5","6","7","8","9","(",")","-","*","/","+","=",",",".","!","?",":",";","%","$" ];
+
+	var uaSimv = ["0","1","2","3","4","5","6","7","8","9"];
+
+	var st = "<div style=\"font-family: 'arial' ; \" >";
+	for (var i = 0; i < uaSimv.length; i++) st += uaSimv[i] + " ";
+	st += "</div><div style=\"font-family: 'times new roman'; \" >";
+	for (var i = 0; i < uaSimv.length; i++) st += uaSimv[i] + " ";
+	st += "</div><div style=\"font-family:'verdana'; \" >";
+	for (var i = 0; i < uaSimv.length; i++) st += uaSimv[i] + " ";
+	st += "</div><br>";
+
+	for (var i = 0; i < 1000; i++) 
+	{
+		var sty = getRandomArbitrary(0, 3);
+		if ( sty == 0) st += "<span style=\"font-family: 'arial' ; \" >";
+		else if ( sty == 1) st += "<span style=\"font-family: 'times new roman' ; \" >";
+		else if ( sty == 3) st += "<span style=\"font-family: 'verdana' ; \" >";
+
+		var ran = getRandomArbitrary(0, uaSimv.length-1);
+		st += uaSimv[ ran] + " " ;
+
+		st += "</span>";
+	};
+	st += "<br>";
+
+	$("#thebody").html( st );
+*/
+
+
+/*
+	ind = ["000","001"];
+	outd = ["0", "1"];
+	$.post("/_php_scripts/set_samplies_from_network.php",
+    {
+        indata: ind,
+        outdata: outd
+    },
+    function(data, status)
+    {
+    	document.write( data );
+        alert("Data: " + data + "\nStatus: " + status);
+    });*/
+
+    $.post("/_php_scripts/get_samplies_from_network.php",
+    function(data, status)
+    {
+    	//document.write( data );
+    	var obj = JSON.parse( data );
+
+    	var ind = [];
+    	var	outd = [];
+    	for (var i = 0; i < obj.length; i++) {
+    		ind[i] = obj[i].sample_inpup;
+    		outd[i] = obj[i].sample_output;
+    	};
+
+    	//document.write( obj[0].sample_inpup );
+    	//document.write( obj[0]['sample_inpup'] );
+    });
+
+
+				//var net = new brain.NeuralNetwork();
+				var net = new brain.NeuralNetwork({
+				  activation: 'sigmoid', // Функція активації
+				  hiddenLayers: [4], // Три шари з 4-ма перептронами
+				  learningRate: 0.6 // Глобальна швидкість навчання, корисна при тренуванні з використанням потоків
+				});
+
+				net.train([{input: [0, 0], output: [0]},
+				           {input: [0, 1], output: [1]},
+				           {input: [1, 0], output: [1]},
+				           {input: [1, 1], output: [0]}],
+
+
+				            {errorThresh: 0.005,  // error threshold to reach
+							iterations: 20000,   // maximum training iterations
+							log: true,           // console.log() progress periodically
+							logPeriod: 10,       // number of iterations between logging
+							learningRate: 0.3    // learning rate
+							});
+
+
+				var output = net.run([1, 0]); // 1
+			 
+				alert( output );
+				alert(net.run([0, 0]) );
+
+				//var json = net.toJSON();
+				//alert( String(json) );
+				var func = net.toFunction();
+				alert( String(func) );
+				var out = func( [0,1] ) ; 
+			 	alert( func.toString() );
+
+
+
+
+
+			 	//var net = new brain.NeuralNetwork();
+				var net = new brain.NeuralNetwork({
+				  activation: 'sigmoid', // Функція активації
+				  hiddenLayers: [16], // Три шари з 4-ма перептронами
+				  learningRate: 0.6 // Глобальна швидкість навчання, корисна при тренуванні з використанням потоків
+				});
+
+				var ar1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+				var ar2 = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+
+				net.train( [{input: ar1, output: [0]},
+				           {input: ar2, output: [1]}] ,
+
+
+				            {errorThresh: 0.005,  // error threshold to reach
+							iterations: 20000,   // maximum training iterations
+							log: true,           // console.log() progress periodically
+							logPeriod: 10,       // number of iterations between logging
+							learningRate: 0.5    // learning rate
+							});
+
+
+				var output = net.run([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]); // 1
+			 
+				alert( output );
+				alert(net.run([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]) );
+				var json = net.toJSON();
+				alert( String(json) );
+				alert( JSON.stringify(json));
+
+				var func = net.toFunction();
+				alert( String(func) );
+				var out = func( ar2 ) ; 
+			 	alert( func.toString() );
+			 	alert( out );
+
+			alert("ase");		
+				var net = new brain.NeuralNetwork({
+				  activation: 'sigmoid', // Функція активації
+				  hiddenLayers: [16], // Три шари з 4-ма перептронами
+				  learningRate: 0.6 // Глобальна швидкість навчання, корисна при тренуванні з використанням потоків
+				});
+				net.fromJSON( JSON.parse( JSON.stringify(json) ) );
+				var output = net.run([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]); // 1
+				alert( output );
+			alert("ase");	
+	
+
+
+	var theTextType  = ["arial","times new roman","verdana"];
+	var theTextTypeCount = theTextType.length; //3  //130
+
+
+	for (var i = 0; i < theTextType.length ; i++) 
+	{
+		var isin = $("#thisin").html();
+
+		var dat = "<div style=\"font-family: '" + theTextType[i]+"';\" >";
+		dat  = dat + "<b>"+ theTextType[i] + ":</b> ";
+		for (var n = 0; n < theWords.length; n++) 
+		{
+			dat = dat + theWords[n] + " ";
+		}
+		dat  = dat + "</div>";
+
+		$("#thisin").html( isin + dat );
+	};
+
+
+ 
+ 
+
+	for (var i = 0; i < theTextType.length ; i++) 
+	{ 
+		$('#thebody').append(theTextType[i] + ":");
+		for (var n = 0; n < theWords.length; n++) {
+			 
+			var canv = document.createElement('canvas');
+			canv.id =  theTextType[i] + n;
+			canv.width = 16;
+			canv.height = 16;
+			canv.style.width = 16;
+		    canv.style.height = 16;
+		    var ctx = canv.getContext('2d');
+
+			ctx.moveTo(0,0);
+			ctx.lineTo(0,16);
+			ctx.moveTo(0,16);
+			ctx.lineTo(16,16);
+			ctx.moveTo(16,16);
+			ctx.lineTo(16,0);
+			ctx.moveTo(16,0);
+			ctx.lineTo(0,0);
+			ctx.stroke();
+	    
+		    ctx.font = "14px " + theTextType[i];
+		    ctx.fillStyle = "red";
+			ctx.textAlign = "center";
+			ctx.fillText( theWords[n], canv.width/2 , canv.height/2 + 14/3);
+
+
+
+			document.getElementById('thebody').appendChild(canv); // adds the canvas to #someBox
+
+		};
+		$('#thebody').append("<br><br>");
+	};
+
+
+
+ 
+</script>

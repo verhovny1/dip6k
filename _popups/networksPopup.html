@@ -1,0 +1,189 @@
+
+<div  style="border:groove 1px gray;  margin-right:40px;  border-radius:5px; padding:5px; height:100%;  text-align: center; ">
+
+	<h5>Оберіть одну з наявних нейронних мереж, або створіть нову</h5>
+	<hr>
+ 		
+ 		<div id="netPopupMessegDiv" style="color:rgba(255,0,0,1);" ></div>
+ 		<table  style="width:100%;">
+		<tr>
+			<td  style="width:50%;  padding:5px;" >
+
+				<div >Існуючі нейронні мережі</div>
+				<select id="netPopupSelect" class="form-control" >
+					<option value="" >Пусто</option>
+				</select>
+				<div id="netPopupNetwSymbDiv" ></div>
+
+				<br>
+				<button id="netPopupObratiBtn" style="width:100%;" class="btn btn-default" >Обрати мережу</button>
+
+			</td>
+			<td style="border:solid 1px rgba(220,220,220,1); " >
+
+			</td>
+			<td style="width:50%;    padding:5px; ">
+
+				<div>Нова мережа</div>
+				<input id="netPopupInputName" type="text" class="form-control" placeholder="Назва" >	
+
+				<br>
+				<input id="netPopupInpitSymbols" type="text" class="form-control" placeholder="Перелік символів. Наприклад 0123456789-*/+=,.!?:,%$абвгґдеєжзиіїйклмнопрстуфхцчшщьюя" >
+
+				<br>
+				<button id="netPopupCreateBtn" style="width:100%;" class="btn btn-default" >Створити нову мережу</button>
+
+			</td>
+		</tr>
+	</table>
+
+
+	<hr>
+	<div style="text-align:right;">
+		<button  class="btn btn-default" onclick="closePopup()" >Закрити</button>
+	</div>
+	
+
+</div>
+
+
+<script type="text/javascript">
+
+	
+	//Функція при запуску попапа
+	function createNetPopup()
+	{ 
+		var st = "";
+		for (var i = 0; i < USER_NEURAL_NETORKS_COUNT; i++) 
+		{
+			st += "<option value='"+USER_NEURAL_NETORKS[i].network_id+"' >"+USER_NEURAL_NETORKS[i].network_name+"</option>";
+		};
+		$("#netPopupSelect").html( st );
+ 
+ 		USER_NEURAL_NETORKS_POSITION = 0;
+
+ 
+		if( USER_NEURAL_NETORKS_COUNT == 0 )
+		{
+			var netPopupObratiBtn = document.getElementById('netPopupObratiBtn');
+			netPopupObratiBtn.disabled = true;
+		}
+
+	}
+	createNetPopup();
+
+
+	//при зміні вибору існуючої нейромережі
+	$("#netPopupSelect").change(function()
+	{
+		var num = 0;
+		for (var i = 0; i < USER_NEURAL_NETORKS_COUNT; i++)  
+			if ( USER_NEURAL_NETORKS[i].network_id == this.value) num= i;
+
+		$("#netPopupNetwSymbDiv").text("Список символів: "+USER_NEURAL_NETORKS[num].network_symbols ); 
+		USER_NEURAL_NETORKS_POSITION = num;
+
+	});
+	//Кнопка вибору існуючої мережі
+	$("#netPopupObratiBtn").click(function(){
+
+		OUTPUT_ARRAYS_DATA = [];
+		OUTPUT_ARRAYS_DATA_COUNT = 0;
+
+		var symb = USER_NEURAL_NETORKS[USER_NEURAL_NETORKS_POSITION].network_symbols;
+		for (var i = 0; i < symb.length; i++) {
+			OUTPUT_ARRAYS_DATA[OUTPUT_ARRAYS_DATA_COUNT] = symb[i];
+			OUTPUT_ARRAYS_DATA_COUNT++;
+		};
+
+		//відкриваємо попап
+    	showPopup('/_popups/popup.html');
+	});
+	
+
+	//Кнопка створення нової мережі
+	$("#netPopupCreateBtn").click(function(){
+
+		var name = $("#netPopupInputName").val();
+		var symbols = $("#netPopupInpitSymbols").val();
+		var activation_function  = "sigmoid";
+		var hidden_layers = "16,8,16";
+		//Перевірка назви
+
+		//Перевірка переліку символів
+
+
+		OUTPUT_ARRAYS_DATA = [];
+		OUTPUT_ARRAYS_DATA_COUNT = 0;
+		for (var i = 0; i < symbols.length; i++) {
+			OUTPUT_ARRAYS_DATA[OUTPUT_ARRAYS_DATA_COUNT] = symbols[i];
+			OUTPUT_ARRAYS_DATA_COUNT++;
+		};
+
+		//запис в базу
+		$.post("/_php_scripts/set_user_networks.php",
+	    {
+
+	        network_name: name,
+	        network_json: '',
+	        network_symbols: symbols,
+	        network_user_id: USER_ID,
+	        network_activation_function: activation_function,
+	        network_hidden_layers: hidden_layers
+	    },
+	    function(data, status)
+	    {	
+	    	if( data == "New record created successfully" )
+	    	{
+	    		alert("Данні успішно записані");
+
+    		    //одержимо всі мережі користувача
+			    $.post("/_php_scripts/get_user_networks.php",
+			    {
+			        user_id: USER_ID
+			    },
+			    function(data, status)
+			    { 
+			    	
+			        USER_NEURAL_NETORKS_COUNT = 0;
+			        USER_NEURAL_NETORKS = [];
+			         
+			        if (data != "0 results")
+			        {
+			            var obj = JSON.parse( data );
+
+			            for (var i = 0; i < obj.length; i++) 
+			            {
+			                var UNN = {};
+			                UNN.network_id = obj[i].network_id;
+			                UNN.network_name = obj[i].network_name;
+			                UNN.network_json = obj[i].network_json;
+			                UNN.network_symbols = obj[i].network_symbols;
+			                UNN.network_activation_function = obj[i].network_activation_function;
+			                UNN.network_hidden_layers = obj[i].network_hidden_layers;
+
+			                USER_NEURAL_NETORKS[i] = UNN;
+			                USER_NEURAL_NETORKS_COUNT ++;
+			            };
+
+			            USER_NEURAL_NETORKS_POSITION = USER_NEURAL_NETORKS_COUNT-1;
+
+
+			            //відкриваємо попап
+			        	showPopup('/_popups/popup.html');
+			        }    
+			       
+			    });
+
+
+	    		//відкриваємо попап
+    			//showPopup('/_popups/popup.html');
+	    	}
+	    });
+
+
+		
+	});
+
+
+</script>
