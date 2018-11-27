@@ -109,36 +109,30 @@
 
 
 
-    <div>Нейронні мережі для розпізнавання тексту:</div>
+    <div>Нейронна мережі для розпізнавання тексту:</div>
     <select id="neuralNetworksSelect" class="form-control">
         <option value="0">За замовчуванням</option>
         <option value="1">Метод 1</option>
         <option value="2">Метод 2</option>
     </select><br>
- 
-    <div class="checkbox">
-    <label>
-        <input id="isTextAnalizi" type="checkbox"   checked="true" >аналізувати вихідний текст
-    </label>
-    <br><br>
-    
-    <div>Результат розпізнавання: <button class="btn btn-default btn-xs"   id="downloadLink" >скачати</button></div>
+
+    <div>Результат розпізнавання:</div>
     <div id="recognitionResultDiv" style="width:100; min-height:100px; border: 1px solid rgb(230,230,230); border-radius: 5px; " >
 
     </div>
 
- 
+
 </div>
 <br>
 
 <div style="text-align:right;">
-    <button id="startWork"  class="btn btn-success " >Запуститу розпізнавання</button>
+    <button id="startWork" class="btn btn-success " >Запуститу розпізнавання</button>
     <br><br><button class="btn btn-success " id="startTrain" >Тренувати нейронну мережу</button>
 </div>
 
 
 
-<div id="TrackingjsData" style="display: none;"  >
+<div id="TrackingjsData">
     <canvas id="canvas1" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
     <canvas id="canvas2" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
     <canvas id="canvas3" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
@@ -147,8 +141,7 @@
     <canvas id="canvas6" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>
 </div>
 
-<!-- style="display: none;" -->
-<div    >
+<div>
     <div>Мова тексту:</div>
     <select id="langsel" class="form-control">
         <option value="auto">Автовизначення</option>
@@ -220,9 +213,7 @@
         <option value='vie'> Vietnamese            </option>
     </select><br>
 
-    <button class="btn btn-success " onclick="recognizeFile(window.lastFile)" >Запуститу розпізнавання тексту з основного канфасу</button>
-       
-    <div id="log"></div>
+    <button class="btn btn-success " onclick="recognizeFile(window.lastFile)" >Запуститу розпізнавання тексту з основного канфасу</button>   
 </div>
 
 <div style="display: none;" >
@@ -238,7 +229,7 @@
     <canvas id="workCanvas10" width="320" height="240" style="border:double 2px gray; width:600px; height:450px; "></canvas>  
 </div>
 
-
+<div id="log"></div>
 
 <script type="text/javascript">
 
@@ -330,9 +321,7 @@
     //Запуск розрізнавання тексту
     $("#startWork").click(function () {
 
-        console.log("");
-        console.log("Початок розпізнавання, "+ getDateTimeNow() + " | " + performance.now());
-        //alert("startWork");
+        alert("startWork");
         startRec('canvas');
 
     });
@@ -387,35 +376,7 @@
         
 
     }
-    startOnlinePage();
- 
-
-
-    $('#downloadLink').click(function(){
-  
-
- 
-        var textToWrite = $("#recognitionResultDiv").text();
-        var textFileAsBlob = new Blob([ textToWrite ], { type: 'text/plain' });
-        var fileNameToSaveAs = "Результат.txt";
-
-        var downloadLink = document.createElement("a");
-        downloadLink.download = fileNameToSaveAs;
-        downloadLink.innerHTML = "Download File";
-        if (window.webkitURL != null) {
-        // Chrome allows the link to be clicked without actually adding it to the DOM.
-        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-        } else {
-        // Firefox requires the link to be added to the DOM before it can be clicked.
-        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-        downloadLink.onclick = destroyClickedElement;
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        }
-
-        downloadLink.click(); 
- 
-    });
+    startOnlinePage()
 
 </script>
 

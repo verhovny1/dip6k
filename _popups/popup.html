@@ -29,9 +29,6 @@
 					<tr>
 						<td colspan = "3" ><button id="popupSkipBtn" style="width:100%;" class="btn btn-default" disabled>Пропустить символ</button></td>
 					</tr>
-					<tr>
-						<td colspan = "3" ><button id="popupDetermAllBtn" style="width:100%;" class="btn btn-default" >Визничить всі символи</button></td>
-					</tr>
 				</table>			
 				
 				<br>
@@ -58,7 +55,7 @@
 	<hr>
 	<table style="width:100%">
 		<tr>
-		<!--	<td style="width:20%">
+			<td style="width:20%">
 				<div class="form-group">
 				    <label for="activationParametr">Функія активації</label>
 				    <select class="form-control" id="activationParametr" >
@@ -68,26 +65,26 @@
 				    	<option value ="tanh" >tanh</option>
 				    </select>
 				</div> 
-			</td> -->
-			<td style="width:25%">
+			</td>
+			<td style="width:20%">
 				<div class="form-group">
 				    <label for="hiddenLayersParametr">Приховані слої</label>
 				    <input type="text" class="form-control" id="hiddenLayersParametr" value="120" placeholder="120,60,120">
 				</div>
 			</td>
-			<td style="width:25%">
+			<td style="width:20%">
 				<div class="form-group">
 				    <label for="learningRateParametr">Швидкість навчання</label>
 				    <input type="text" class="form-control" id="learningRateParametr" value="0.3" placeholder="від 0 до 1 (0.3)">
 				</div>
 			</td>
-			<td style="width:25%">
+			<td style="width:20%">
 				<div class="form-group">
 				    <label for="errorThreshParametr">Порогова помилка</label>
 				    <input type="text" class="form-control" id="errorThreshParametr" value="0.0005" placeholder="0.0005">
 				</div>
 			</td>
-			<td style="width:25%">
+			<td style="width:20%">
 				<div class="form-group">
 				    <label for="iterationsParametr">Макс. кільк. ітерацій</label>
 				    <input type="text" class="form-control" id="iterationsParametr" value="2000" placeholder="20000">
@@ -127,14 +124,14 @@
 
 
 	//Функція при відкритті та перемальовці попапа
-	function popupOpenFunk( pozition )
+	function popupOpenFunk( poz )
 	{
-		if ( pozition < INPUT_ARRAYS_DATA_COUNT  && pozition >= 0)//якщо позиція в межах масиву
+		if ( poz < INPUT_ARRAYS_DATA_COUNT  && poz >= 0)//якщо позиція в межах масиву
 		{ 
-			var indat = INPUT_ARRAYS_DATA[pozition];
+			var indat = INPUT_ARRAYS_DATA[poz];
 
 			//відобразимо позицію
-			$("#popupSimvDiv").text( "Символ №"+(pozition+1)+" з "+INPUT_ARRAYS_DATA_COUNT+" знайдених" ); 	
+			$("#popupSimvDiv").text( "Символ №"+(POPUP_POZITION+1)+" з "+INPUT_ARRAYS_DATA_COUNT+" знайдених" ); 	
 
 			//заповнюємо селект символами
 			var poz = $("#popupSelect option:selected").val(); 
@@ -196,39 +193,6 @@
 	$("#popupSkipBtn").click(function(){
 
 	});
-	//кнопка визначити вісі символи на зображенні як
-	$("#popupDetermAllBtn").click(function(){
-		
-
-		var sumAr = []; 
-		var poz = $("#popupSelect option:selected").val();
- 
-		for (var i = 0; i < OUTPUT_ARRAYS_DATA_COUNT; i++) 
-		{
-			if ( i == poz) sumAr[i] = 1;
-			else sumAr[i] = 0;
-		};
- 
-
- 
-
-		while (  POPUP_POZITION  < INPUT_ARRAYS_DATA_COUNT  )
-		{ 
-			//Записуэмо позицію
-			var trData = {};
-			trData.input = INPUT_ARRAYS_DATA[POPUP_POZITION].bin256;
-			trData.output = sumAr;
-
-			POPUP_TREIN_DATA[POPUP_POZITION] = trData;
-
-
-			POPUP_POZITION++;
-		}
-
-		POPUP_POZITION--;
-		popupOpenFunk( POPUP_POZITION);
-
-	});
 	//Зміна вибору селекту символів
 	$("#popupSelect").change(function(){
 
@@ -270,8 +234,7 @@
 	{
 		var ind = [];
 		var outd = [];
-		for (var i = 0; i < POPUP_POZITION; i++) 
-		{ 
+		for (var i = 0; i < POPUP_POZITION; i++) {
 			var inp = POPUP_TREIN_DATA[i].input;
 			var outp = POPUP_TREIN_DATA[i].output;
 			var s1 = "";
@@ -281,39 +244,12 @@
 
 			ind[i] = s1;
 			outd[i] = s2;
-
-						/*document.write("i = " + i + "<br>");
-			document.write("network_id = " + USER_NEURAL_NETORKS[USER_NEURAL_NETORKS_POSITION].network_id + "<br>");
-			document.write("input = " + ind[i] + "<br>");
-			document.write("output = " + outd[i]  + "<br>");*/
 		};
 
 		if( POPUP_POZITION > 0)
 		{ 
 			var network_id =  USER_NEURAL_NETORKS[USER_NEURAL_NETORKS_POSITION].network_id;
 	 
-
-			var http = new XMLHttpRequest();
-			var url = "/_php_scripts/set_samplies_from_network.php";
-			var params = "indata="+ind+"&outdata="+outd+"&sample_network_id="+network_id;
-			http.open("POST", url, true);
-
-			//Send the proper header information along with the request
-			http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-			http.onreadystatechange = function() {//Call a function when the state changes.
-			    if(http.readyState == 4 && http.status == 200) {
-			        if( http.responseText  == "New record created successfully")  
-		    		{ 
-		    			if(  startTran == true ) startTr();
-		    			else alert("Вхідні дані успішно записані");
-		    		}
-		    		else document.write(data);
-			    }
-			}
-			http.send(params);
-
-/*
 			$.post("/_php_scripts/set_samplies_from_network.php",
 		    {
 		        indata: ind,
@@ -327,10 +263,7 @@
 	    			if(  startTran == true ) startTr();
 	    			else alert("Вхідні дані успішно записані");
 	    		}
-	    		else document.write(data);
 		    });
-*/
-
 		}
 
 	}
@@ -346,7 +279,7 @@
 	function startTr()
 	{
 		//Одержимо данні для навчання
-		var activationParametr =  "sigmoid"; // $("#activationParametr option:selected").val();
+		var activationParametr = $("#activationParametr option:selected").val();
 		var hiddenLayersParametr = JSON.parse( "[" + $("#hiddenLayersParametr").val() + "]" ); 
 		var learningRateParametr = parseFloat(  $("#learningRateParametr").val()  );
 		var errorThreshParametr = parseFloat(  $("#errorThreshParametr").val()  );
@@ -363,7 +296,7 @@
 	    {
 
 	    	var obj = JSON.parse( data );
-    	console.log("Кількість вхідних даних = " + obj.length );
+
 	    	//Формуємо вхідний масив даних
 			let trainData = [];
 			for (var i = 0; i < obj.length; i++) 
@@ -375,8 +308,6 @@
 			  	trainData.push(bufObj)
 			}
  
- 		var time = performance.now();
-		console.log("Початок навчання, "+ getDateTimeNow() + " | " + time);
 
 			//обучаємо
 			var net = new brain.NeuralNetwork({
@@ -390,20 +321,17 @@
 			            {errorThresh: errorThreshParametr,//0.0005,  // error threshold to reach
 						iterations: iterationsParametr,//2000,   // maximum training iterations
 						log: true,           // console.log() progress periodically
-						logPeriod: 1,       // number of iterations between logging
+						logPeriod: 10,       // number of iterations between logging
 						learningRate: learningRateParametr //0.5    // learning rate
 						}
 					 );
-
-		time = performance.now() - time;
-		console.log("Кінець навчання, " + getDateTimeNow() + " | " + performance.now() + " , різниця = " + time);
 
 			//отримуемо джчон нейромережі
 			var json = net.toJSON();
 			var jsonStr = JSON.stringify(json);
 			//alert( JSON.stringify(json));
 			
-		console.log("Збереження мережі в базу");
+
 			//зберігаєм джсон в базу
 			$.post("/_php_scripts/update_user_networks.php",
 		    {
@@ -419,7 +347,7 @@
 		    {
 		    	if( data == "New record created successfully" )
 		    	{
-		    		console.log("Нейронна мережа успішно пройшла тренування");
+		    		//відкриваємо попап
 	    			alert("Нейронна мережа успішно пройшла тренування");
 		    	}
 		    });

@@ -484,37 +484,6 @@ this.segmentationArrayGrille = function (arr)
         structArrText[i] = words;
     }
 
-    for (var i = 0; i < structArrText.length; i++) 
-        for (var n = 0; n < structArrText[i].length; n++)
-            for (var z = 0; z < structArrText[i][n].length; z++) 
-            {
-                var aT = structArrText[i][n][z];
-
-                try 
-                {
-                    if( aT.left < 0 ) structArrText[i][n][z].left = 0;
-                    else if( aT.left >= arr[0].length ) structArrText[i][n][z].left = arr[0].length - 1;
-
-                    if( aT.right < 0 ) structArrText[i][n][z].right = 0;
-                    else if( aT.right >= arr[0].length ) structArrText[i][n][z].right = arr[0].length - 1;
-
-                    if( aT.top < 0 ) structArrText[i][n][z].top = 0;
-                    else if( aT.top >= arr.length ) structArrText[i][n][z].top = arr.length - 1;
-
-                    if( aT.bottom < 0 ) structArrText[i][n][z].bottom = 0;
-                    else if( aT.bottom >= arr.length ) structArrText[i][n][z].bottom = arr.length - 1;
-                } catch (e)
-                {
-                    simv = {};
-                    simv.left = 0;
-                    simv.right = 0;
-                    simv.top = 0;
-                    simv.bottom = 0;
-                    structArrText[i][n][z] = simv;
-                }
-
-            }
-
     return structArrText;
 
     /*//знайдемо пробіли між буквами
@@ -889,54 +858,6 @@ this.rozmColorImg = function (canvasId,canvastoId, param)
     */
 }
 
-this.rozmArrPixil = function( arr, param)
-{
-    var param = 1;
-    if (arguments.length >= 2) param = arguments[1];
-
-    var H = arr.length;
-    var W = arr[0].length;
-
-    var retArr = [];
-
-    for (var i = 0; i < H ; i++) 
-    {
-        var rA = [];
-        for (var n = 0; n < W; n++) 
-        {
-            
-            var sumR = 0; var sumG = 0; var sumB = 0;
-            var count = 0;
-            for (var a = i-param; a <= i+param; a++) 
-            {
-                for (var b = n-param; b <= n+param; b++) 
-                {
-                    if ( a >=0 && b >=0 && a < H && b < W)
-                    {
-                        sumR += arr[a][b].R;
-                        sumG += arr[a][b].G;
-                        sumB += arr[a][b].B;
-
-                        count++;
-                    }
-                }
-            }
-
-            var RGB = {};
-            RGB.R = Math.round( (sumR + 1)  / count );
-            RGB.G = Math.round( (sumG + 1) / count );
-            RGB.B = Math.round( (sumB + 1) / count );
-            RGB.A = arr[i][n].A ;
-
-            rA[n] = RGB;
-
-        }
-        retArr[i] = rA;
-    }
-
-    return retArr;
-}
-
  //--
 //функція бінаризації
 function binarize(canvas_id, canvastoId )
@@ -1146,16 +1067,15 @@ this.segmentation = function (canvasId, canvastoId)
 
                 for (var z = 0; z <  findObjects[i][n].length; z++) 
                 {
-                   
-
+                   /*
                     MYtop = findObjects[i][n][z].top;
                     MYleft = findObjects[i][n][z].left;
                     MYbottom = findObjects[i][n][z].bottom;
-                    MYright = findObjects[i][n][z].right;
-                    /*MYtop = findObjects[i][n][z].top-1;
+                    MYright = findObjects[i][n][z].right;*/
+                    MYtop = findObjects[i][n][z].top-1;
                     MYleft = findObjects[i][n][z].left-1;
                     MYbottom = findObjects[i][n][z].bottom+1;
-                    MYright = findObjects[i][n][z].right+1;*/
+                    MYright = findObjects[i][n][z].right+1;
                     
                     //document.write("top=" + MYtop + " MYleft=" + MYleft + " MYbottom=" + MYbottom + " MYright=" + MYright + "<br>");
                     for (m = MYtop; m <= MYbottom; m++) { pA[m][MYleft].R = 255; pA[m][MYleft].G = 0; pA[m][MYleft].B = 0; }

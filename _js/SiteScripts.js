@@ -29,22 +29,18 @@ this.startRec = function (canvasId)
     //blurryColorImg(canvasId, "canvas1", 2, "averaging");
     //binarize(canvasId, canvasId, 2);
     //resample_single(canvasId, "canvas2", 324, 173);
- 
-    //inShadesOfGray( canvasId, "canvas2" );
-    //binarize(canvasId, "canvas2", 2);
-    //segmentation("canvas2" , "canvas3"  );
+    rozmColorImg(canvasId, "canvas3", 5);
+    inShadesOfGray(canvasId, "canvas4", "coefficients");
+    inShadesOfGray( canvasId, "canvas2" );
+    //segmentation(canvasId, canvasId,"pixelscan");
     //segmentation(canvasId, canvasId);
     
-    binarize(canvasId, "workCanvas1", 2);
-    //rozmColorImg("workCanvas1", "workCanvas1", 5);
+    binarize(canvasId, canvasId, 2);
     //одержуємо 2-д масив пікселів з канвасу
-    var pA = getRGB2dArrFromCanv("workCanvas1");   
-    
-    console.log("Початок сегментації, "+ getDateTimeNow() + " | " + performance.now());
+    var pA = getRGB2dArrFromCanv(canvasId);   
     //знайдемо масив обєктів(букв)
     var arrText = [];
     arrText = segmentationArrayGrille(pA);
-
 
 
     //формуємо масив вхідних даних (строка -> слово -> символ = bin256 (бінарний масив (0 і 1) з 256 елементів )  )
@@ -62,7 +58,6 @@ this.startRec = function (canvasId)
                 var data = get2dArrFrom2dArr(pA,aT.left,aT.top,aT.right,aT.bottom);
                 //Змінюємо розміри до 16 на 16
                 var var16x16 = resampleSingleArr(data,16,16);
-                //var16x16 = rozmArrPixil(var16x16,1);
                 //проводимо бiнаризацію масиву
                 var bin16x16 = binarizeArray(var16x16,127);
                 //конвертуємо масив в одномірний
@@ -86,7 +81,6 @@ this.startRec = function (canvasId)
         inputArr[i] = words;
     }
 
-    console.log("Запит данних мережі, "+ getDateTimeNow() + " | " + performance.now());
 
     var network_id = $("#neuralNetworksSelect option:selected ").val(); //6;
     //Беремо з бази джсон для нейромережі
@@ -113,7 +107,7 @@ this.startRec = function (canvasId)
                 //втавляємо джсон обученої мережі
                 net.fromJSON(  JSON.parse(   netwJson   ) );
 
-                console.log("Початок класифікації, "+ getDateTimeNow() + " | " + performance.now());
+
                 //
                 var responseText = "";
                 for (i = 0; i < inputArr.length; i++)
@@ -145,13 +139,8 @@ this.startRec = function (canvasId)
                         }
                         responseText+=" ";
                     }
-
                     responseText+="<br>";
                 }
-
-                console.log("Кінець класифікації, "+ getDateTimeNow() + " | " + performance.now());
-
-                if( document.getElementById("isTextAnalizi").checked == true ) responseText = sheckTextData(responseText); 
 
                 $("#recognitionResultDiv").html(responseText);
                 //document.write( responseText );   
@@ -163,7 +152,7 @@ this.startRec = function (canvasId)
         }
     }); 
     
-    //alert("It's work"); 
+    alert("It's work"); 
 }
 this.traitNerl = function (canvasId)
 {
@@ -209,7 +198,6 @@ this.traitNerl = function (canvasId)
                 }
                 document.write("<br>");*/ 
 
-                //var16x16 = rozmArrPixil(var16x16,1);
                 //проводимо бынаризацію масиву
                 var bin16x16 = binarizeArray(var16x16,127);
                 //принт
@@ -306,17 +294,6 @@ this.traitNerl = function (canvasId)
 
 
 
-function getDateTimeNow()
-{
-    var dt = new Date(); 
-
-    var theMonth = String( dt.getMonth()+1 );
-    if ( theMonth.length == 1 ) theMonth = "0" + theMonth;
-
-    var datetime = dt.getDate() + "/" + theMonth + "/" + dt.getFullYear() + " " + dt.getHours() + ":" + dt.getMinutes() + ":"  + dt.getSeconds();
-
-    return datetime;
-}
 //Повертає значення не менше (і, можливо, рівне) min, і менше (і не дорівнює) max.
 function getRandomArbitrary(min, max) 
 {
@@ -352,68 +329,6 @@ function closePopup ()
         modal.style.display = "none";
     }
 }*/
-
-
-
-
-function sheckTextData ( intext )
-{
-    var outtext = "";
-
-    for (var i = 0; i < intext.length; i++) 
-    {
-        //Визначимо чи знаходиться стмвол у верхньому регісрі
-        var isUpperCase = true;
-        if ( intext[i] == intext[i].toUpperCase() ) isUpperCase = true; else isUpperCase = false;
-
-        //якщо символ в верхньому регістрі
-        if ( isUpperCase == true)
-        {
-            if ( i == 0  ) outtext += intext[i];
-            else
-            {
-                //перевіримо сусідні символи
-                if ( intext[i+1] == "." &&  ( intext[i-1] == " " ||  intext[i-1] == ".")  ) outtext += intext[i];
-                else if ( intext[i+1] == "." )  outtext += intext[i].toLowerCase();
-                else if ( intext[i-1] == " " )
-                {
-                    var isTrue = true;
-                    for (var n = i - 1; n >= 0; n--) 
-                    {
-                        if ( intext[n] == "." || intext[n] == "!"  || intext[n] == "?" )  break;
-                        else if ( intext[n] != " ") 
-                        {
-                            isTrue = false;
-                            break;
-                        }
-                        
-                    }
-
-                    if ( isTrue == true ) outtext += intext[i];
-                    else outtext += intext[i].toLowerCase();
-                }
-                else
-                {
-                    outtext += intext[i].toLowerCase();
-                }
-            }
-        }
-        else
-        {
-             outtext += intext[i];
-        }
-
-    }
-
-
-    return outtext;
-}
-
-
-
-
-
-
 //Годинник в футері
 var Greeter = (function () {
     function Greeter(element) {
